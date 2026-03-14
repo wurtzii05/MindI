@@ -29,7 +29,6 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import se.mindi.ui.theme.MindITheme
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import android.content.Intent
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Handler
