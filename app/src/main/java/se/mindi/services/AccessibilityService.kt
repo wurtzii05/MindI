@@ -1,19 +1,18 @@
 package se.mindi.services
 
-import android.accessibilityservice.AccessibilityGestureEvent
 import android.accessibilityservice.AccessibilityService
-import android.os.Build
 import android.util.Log
-import android.view.Display
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 
 
 class AccessibilityService : AccessibilityService() {
     override fun onInterrupt() {}
+    override fun onServiceConnected() {
+        Log.d("ACCESS", "Service connected")
+    }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         // Get the source node of the event.
