@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MindI</string>
+    <string name="accessibility_service_label">Service Label</string>
+    <string name="accessibility_service_description">All your ui will be mine</string>
 </resources>
