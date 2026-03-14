@@ -1,7 +1,9 @@
 package se.mindi
 
 import android.Manifest
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -46,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
+
 class MainActivity : ComponentActivity() {
 
     private val voiceRecognitionLauncher = registerForActivityResult<Intent,ActivityResult>(
@@ -72,6 +75,10 @@ class MainActivity : ComponentActivity() {
                 tts?.language = Locale.US
             }
         }
+        val intent: Intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+
         setContent {
             MindITheme {
                 MindIApp()
