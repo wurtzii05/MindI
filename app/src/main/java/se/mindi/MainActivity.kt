@@ -69,7 +69,6 @@ class MainActivity : ComponentActivity() {
         //TEXT TO SPEECH
         tts = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                // 2. Set the language (e.g., US English)
                 tts?.language = Locale.US
             }
         }
