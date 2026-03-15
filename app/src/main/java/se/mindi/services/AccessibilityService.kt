@@ -5,8 +5,6 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import androidx.compose.runtime.mutableStateOf
-
 
 class AccessibilityService : AccessibilityService() {
     override fun onInterrupt() {}
