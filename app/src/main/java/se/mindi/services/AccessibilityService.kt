@@ -29,22 +29,31 @@ class AccessibilityService : AccessibilityService() {
         return super.onKeyEvent(event)
     }
 
-    fun getUIString(node: AccessibilityNodeInfo, state: String = ""): String {
-        var s = state
+    fun getUIString(node: AccessibilityNodeInfo): String {
+        val label = if (node.isClickable) {
+            "{CLASS: ${node.className}, BUTTON: ${node.text}}"
+        } else {
+            "{CLASS: ${node.className}, TEXT: ${node.text}}"
+        }
+
+        val chCnt = node.childCount
+        if (chCnt == 0) {
+            return "$label\n"
+        }
+        var state = ""
         for (i in 0 until node.childCount) {
             try {
                 val child = node.getChild(i)
-                s = getUIString(child, s)
-                if (child.isClickable) {
-                    s += "{CLASS: ${child.className}, BUTTON: ${child.text}}\n"
-                } else {
-                    s += "{CLASS: ${child.className}, TEXT: ${child.text}}\n"
+                state += """$label -> {
+                    ${getUIString(child).trimIndent()}
                 }
+                """.trimMargin("|")
+
             } catch (ex: Exception) {
                 Log.d("ERROR", "$ex")
                 return ""
             }
         }
-        return "$s"
+        return state
     }
 }
