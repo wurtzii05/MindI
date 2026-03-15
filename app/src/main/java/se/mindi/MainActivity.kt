@@ -1,7 +1,6 @@
 package se.mindi
 
 import android.Manifest
-import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
@@ -29,6 +28,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import se.mindi.ui.theme.MindITheme
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import android.content.Intent
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Handler
@@ -46,32 +46,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
-import com.aallam.openai.api.chat.ChatCompletionRequest
-import com.aallam.openai.api.chat.ChatMessage
-import com.aallam.openai.api.chat.ChatRole
-import com.aallam.openai.api.http.Timeout
-import com.aallam.openai.api.model.ModelId
-import com.aallam.openai.api.response.ResponseInput
-import com.aallam.openai.api.response.ResponseRequest
-import com.aallam.openai.client.OpenAI
-import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.seconds
-class MainActivity : ComponentActivity() {
 
-    val conversationHistory = mutableListOf<ChatMessage>(
-        ChatMessage(
-            role = ChatRole.System,
-            content = "You are a helpful assistant with the goal of helping a possibly impaired person " +
-                    "to use an android phone. You will be prompted with both a brief description of " +
-                    "UI elements as well as a user request. Please respond using the following commands, " +
-                    "separated by newlines:\n" +
-                    "To speak aloud to the user, use Say(text)\n" +
-                    "To select the UI element with name 'optionName', use Select(optionName)\n" +
-                    "Note that the user cannot use these commands and will not see or hear your whole " +
-                    "response."
-        )
-    )
+
+class MainActivity : ComponentActivity() {
 
     private val voiceRecognitionLauncher = registerForActivityResult<Intent,ActivityResult>(
         ActivityResultContracts.StartActivityForResult()
@@ -125,6 +102,9 @@ class MainActivity : ComponentActivity() {
 
 
 
+            Log.d("VoiceInput","The user said: $spokenText")
+            speakOut(spokenText)
+            // Use spokenText (e.g., set it to a TextView)
         }
     }
     private var tts: TextToSpeech? = null
@@ -163,11 +143,6 @@ class MainActivity : ComponentActivity() {
         tts?.shutdown()
         super.onDestroy()
     }
-
-    private fun handle(aiInput : String)
-    {
-
-    }
     private fun startVoiceInput() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED) {
@@ -187,8 +162,8 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(this, "Voice Recognition not available", Toast.LENGTH_SHORT).show()
         }
     }
-    private fun speakOut(text: String?) {
-        if (!text.isNullOrEmpty()) {
+    private fun speakOut(text: String) {
+        if (text.isNotEmpty()) {
             // The third parameter is null (params), and the fourth is a unique ID for this utterance
             tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "ID_1")
         }
@@ -257,12 +232,12 @@ fun VoiceScreen(onRecordClick: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FilledButtonExample("Click to record", onClick = onRecordClick)
+        FilledButtonExample(onClick = onRecordClick)
     }
 }
 @Composable
-fun FilledButtonExample(text: String, onClick: () -> Unit) {
+fun FilledButtonExample(onClick: () -> Unit) {
     Button(onClick = onClick) {
-        Text(text)
+        Text("Start Voice Input")
     }
 }
