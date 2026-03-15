@@ -46,9 +46,32 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
-
+import androidx.lifecycle.lifecycleScope
+import com.aallam.openai.api.chat.ChatCompletionRequest
+import com.aallam.openai.api.chat.ChatMessage
+import com.aallam.openai.api.chat.ChatRole
+import com.aallam.openai.api.http.Timeout
+import com.aallam.openai.api.model.ModelId
+import com.aallam.openai.api.response.ResponseInput
+import com.aallam.openai.api.response.ResponseRequest
+import com.aallam.openai.client.OpenAI
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 class MainActivity : ComponentActivity() {
+
+    val conversationHistory = mutableListOf<ChatMessage>(
+        ChatMessage(
+            role = ChatRole.System,
+            content = "You are a helpful assistant with the goal of helping a possibly impaired person " +
+                    "to use an android phone. You will be prompted with both a brief description of " +
+                    "UI elements as well as a user request. Please respond using the following commands, " +
+                    "separated by newlines:\n" +
+                    "To speak aloud to the user, use Say(text)\n" +
+                    "To select the UI element with name 'optionName', use Select(optionName)\n" +
+                    "Note that the user cannot use these commands and will not see or hear your whole " +
+                    "response."
+        )
+    )
 
     private val voiceRecognitionLauncher = registerForActivityResult<Intent,ActivityResult>(
         ActivityResultContracts.StartActivityForResult()
@@ -56,13 +79,60 @@ class MainActivity : ComponentActivity() {
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val results = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             val spokenText = results?.get(0) ?: ""
+
+            //Do whatever with spokenText
             Log.d("VoiceInput","The user said: $spokenText")
-            speakOut(spokenText)
-            // Use spokenText (e.g., set it to a TextView)
+
+            // Start a coroutine
+            //This could probably be made into a method
+            lifecycleScope.launch {
+                try {
+                    //NEED TO ALSO ADD INFO ABOUT UI HIERARCHY
+                    conversationHistory.add(ChatMessage(
+                        role = ChatRole.System,
+                        content = "Save\nLoad\nEdit\nView" //get uihierarchy
+                    )
+                    )
+                    //add the user's spoken text
+                    conversationHistory.add(ChatMessage(
+                        role = ChatRole.User,
+                        content = spokenText
+                        )
+                    )
+                    //generate the request
+                    val request = ChatCompletionRequest(
+                        model = ModelId("gpt-5-nano"),
+                        messages = conversationHistory
+                        )
+                    //get the response
+                    val response = ai.chatCompletion(request)
+                    val outputMessage = response.choices.first().message
+                    //add the response to the history
+                    conversationHistory.add(outputMessage)
+                    val outputText = outputMessage.content
+
+                    //just going to have it say the response as a demo
+                    Log.d("AIOutput","The ai said: " + outputText)
+                    speakOut(outputText)
+                    //handle(outputText)
+                } catch (e: Exception) {
+                    Log.d("Exception","AI Response Failure")
+                    e.message?.let { Log.d("Exception",it) }
+                    // Handle errors (network issues, API errors, etc.)
+                }
+
+            }
+
+
+
         }
     }
     private var tts: TextToSpeech? = null
 
+    private val ai = OpenAI(
+        token = BuildConfig.OPENAI_API_KEY,
+        timeout = Timeout(socket = 60.seconds),
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,6 +163,11 @@ class MainActivity : ComponentActivity() {
         tts?.shutdown()
         super.onDestroy()
     }
+
+    private fun handle(aiInput : String)
+    {
+
+    }
     private fun startVoiceInput() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED) {
@@ -112,8 +187,8 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(this, "Voice Recognition not available", Toast.LENGTH_SHORT).show()
         }
     }
-    private fun speakOut(text: String) {
-        if (text.isNotEmpty()) {
+    private fun speakOut(text: String?) {
+        if (!text.isNullOrEmpty()) {
             // The third parameter is null (params), and the fourth is a unique ID for this utterance
             tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "ID_1")
         }
@@ -182,12 +257,12 @@ fun VoiceScreen(onRecordClick: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FilledButtonExample(onClick = onRecordClick)
+        FilledButtonExample("Click to record", onClick = onRecordClick)
     }
 }
 @Composable
-fun FilledButtonExample(onClick: () -> Unit) {
+fun FilledButtonExample(text: String, onClick: () -> Unit) {
     Button(onClick = onClick) {
-        Text("Start Voice Input")
+        Text(text)
     }
 }
