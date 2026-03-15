@@ -56,6 +56,52 @@ class MainActivity : ComponentActivity() {
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val results = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             val spokenText = results?.get(0) ?: ""
+
+            //Do whatever with spokenText
+            Log.d("VoiceInput","The user said: $spokenText")
+
+            // Start a coroutine
+            //This could probably be made into a method
+            lifecycleScope.launch {
+                try {
+                    //NEED TO ALSO ADD INFO ABOUT UI HIERARCHY
+                    conversationHistory.add(ChatMessage(
+                        role = ChatRole.System,
+                        content = "Save\nLoad\nEdit\nView" //get uihierarchy
+                    )
+                    )
+                    //add the user's spoken text
+                    conversationHistory.add(ChatMessage(
+                        role = ChatRole.User,
+                        content = spokenText
+                        )
+                    )
+                    //generate the request
+                    val request = ChatCompletionRequest(
+                        model = ModelId("gpt-5-nano"),
+                        messages = conversationHistory
+                        )
+                    //get the response
+                    val response = ai.chatCompletion(request)
+                    val outputMessage = response.choices.first().message
+                    //add the response to the history
+                    conversationHistory.add(outputMessage)
+                    val outputText = outputMessage.content
+
+                    //just going to have it say the response as a demo
+                    Log.d("AIOutput","The ai said: " + outputText)
+                    speakOut(outputText)
+                    //handle(outputText)
+                } catch (e: Exception) {
+                    Log.d("Exception","AI Response Failure")
+                    e.message?.let { Log.d("Exception",it) }
+                    // Handle errors (network issues, API errors, etc.)
+                }
+
+            }
+
+
+
             Log.d("VoiceInput","The user said: $spokenText")
             speakOut(spokenText)
             // Use spokenText (e.g., set it to a TextView)
@@ -63,6 +109,10 @@ class MainActivity : ComponentActivity() {
     }
     private var tts: TextToSpeech? = null
 
+    private val ai = OpenAI(
+        token = BuildConfig.OPENAI_API_KEY,
+        timeout = Timeout(socket = 60.seconds),
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
