@@ -2,6 +2,7 @@ package se.mindi
 
 import android.Manifest
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -27,6 +28,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import se.mindi.ui.theme.MindITheme
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import android.content.Intent
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Handler
@@ -44,6 +46,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+
 
 class MainActivity : ComponentActivity() {
 
@@ -71,6 +74,10 @@ class MainActivity : ComponentActivity() {
                 tts?.language = Locale.US
             }
         }
+        val intent: Intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+
         setContent {
             MindITheme {
                 MindIApp()
