@@ -62,17 +62,14 @@ class MainActivity : ComponentActivity() {
     val conversationHistory = mutableListOf<ChatMessage>(
         ChatMessage(
             role = ChatRole.System,
-            content = "You are a helpful assistant" +
-                    " with the goal of helping a person who may struggle" +
-                    "to use a touchscreen phone to use an android phone. " +
-                    "You will interpret and complete their instructions and " +
-                    "answer their requests. You will be given information regarding" +
-                    "the UI hierarchy. " +
-                    "Here are relevant commands for you to use (note that the" +
-                    "user cannot use them):" +
-                    "\n /Say(text) to speak text aloud to the user." +
-                    "\n /Select(optionName) to select the listed UI option." +
-                    "\n Please reply with only commands, separated by newlines."
+            content = "You are a helpful assistant with the goal of helping a possibly impaired person " +
+                    "to use an android phone. You will be prompted with both a brief description of " +
+                    "UI elements as well as a user request. Please respond using the following commands, " +
+                    "separated by newlines:\n" +
+                    "To speak aloud to the user, use Say(text)\n" +
+                    "To select the UI element with name 'optionName', use Select(optionName)\n" +
+                    "Note that the user cannot use these commands and will not see or hear your whole " +
+                    "response."
         )
     )
 
@@ -117,6 +114,7 @@ class MainActivity : ComponentActivity() {
                     //just going to have it say the response as a demo
                     Log.d("AIOutput","The ai said: " + outputText)
                     speakOut(outputText)
+                    //handle(outputText)
                 } catch (e: Exception) {
                     Log.d("Exception","AI Response Failure")
                     e.message?.let { Log.d("Exception",it) }
@@ -164,6 +162,11 @@ class MainActivity : ComponentActivity() {
         tts?.stop()
         tts?.shutdown()
         super.onDestroy()
+    }
+
+    private fun handle(aiInput : String)
+    {
+
     }
     private fun startVoiceInput() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
