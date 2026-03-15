@@ -105,6 +105,7 @@ class MainActivity : ComponentActivity() {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         }
 
+        //(try to) Start the voice recognition
         try {
             voiceRecognitionLauncher.launch(intent)
         } catch (e: Exception) {
