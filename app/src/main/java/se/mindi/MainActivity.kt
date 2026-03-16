@@ -114,7 +114,7 @@ class MainActivity : ComponentActivity() {
                     //just going to have it say the response as a demo
                     Log.d("AIOutput","The ai said: " + outputText)
                     speakOut(outputText)
-                    //handle(outputText)
+                    outputText?.let { handle(it) }
                 } catch (e: Exception) {
                     Log.d("Exception","AI Response Failure")
                     e.message?.let { Log.d("Exception",it) }
@@ -166,7 +166,16 @@ class MainActivity : ComponentActivity() {
 
     private fun handle(aiInput : String)
     {
+        aiInput.lines().forEach { line ->
+            if (line.substring(0,3).equals("Say"))
+            {
+                speakOut(line.substring(4, line.length-1))
+            }
+            else if (line.substring(0,6).equals("Select"))
+            {
 
+            }
+        }
     }
     private fun startVoiceInput() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
