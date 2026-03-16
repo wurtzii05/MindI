@@ -1,19 +1,20 @@
 package se.mindi.services
 
-import android.accessibilityservice.AccessibilityGestureEvent
 import android.accessibilityservice.AccessibilityService
-import android.os.Build
 import android.util.Log
-import android.view.Display
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.Toast
-import androidx.annotation.RequiresApi
+import se.mindi.utils.UIHierarchyExplorer
 
 
 class AccessibilityService : AccessibilityService() {
-    override fun onInterrupt() {}
+    override fun onInterrupt() {
+        Log.d("STARTUP", "STARTUPP")
+
+    }
+    override fun onServiceConnected() {
+        Log.d("STARTUP", "STARTUP")
+    }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         // Get the source node of the event.
@@ -23,9 +24,14 @@ class AccessibilityService : AccessibilityService() {
             // take.
 
             // Act on behalf of the user.
-            performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)
+                try {
+                    val explorer = UIHierarchyExplorer.parse(this)
+                    Log.d("EXPLORER", "$explorer")
+
+                } catch (ex: Exception) {
+                    Log.d("ERROR", "$ex")
+                }
         }
-        Log.d("ACCESS", "yo we got something")
     }
 
     @Deprecated("Deprecated in Java")
@@ -35,21 +41,7 @@ class AccessibilityService : AccessibilityService() {
     }
 
     protected override fun onKeyEvent(event: KeyEvent): Boolean {
-        val action: Int = event.getAction()
-        val keyCode: Int = event.getKeyCode()
-        // the service listens for both pressing and releasing the key
-        // so the below code executes twice, i.e. you would encounter two Toasts
-        // in order to avoid this, we wrap the code inside an if statement
-        // which executes only when the key is released
-        if (action == KeyEvent.ACTION_UP) {
-            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-                Log.d("Check", "KeyUp")
-                Toast.makeText(this, "KeyUp", Toast.LENGTH_SHORT).show()
-            } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-                Log.d("Check", "KeyDown")
-                Toast.makeText(this, "KeyDown", Toast.LENGTH_SHORT).show()
-            }
-        }
+
         return super.onKeyEvent(event)
     }
 }

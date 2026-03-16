@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -63,4 +64,5 @@ dependencies {
     implementation("com.aallam.openai:openai-client:4.1.0")
     //needed for openai apparently
     implementation("io.ktor:ktor-client-okhttp:3.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
 }
