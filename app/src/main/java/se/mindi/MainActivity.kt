@@ -114,6 +114,7 @@ class MainActivity : ComponentActivity() {
                     //just going to have it say the response as a demo
                     Log.d("AIOutput","The ai said: " + outputText)
                     speakOut(outputText)
+
                     outputText?.let { handle(it) }
                 } catch (e: Exception) {
                     Log.d("Exception","AI Response Failure")
