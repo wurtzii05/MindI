@@ -1,37 +1,37 @@
-package se.mindi.utils
+package se.mindi.parser
 
 import android.view.accessibility.AccessibilityNodeInfo
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
+import se.mindi.model.UINodeProperties
+import se.mindi.model.UINodeType
 
-class UIHierarchyExplorer {
-    val hierarchyList: MutableList<UINodeProperties> = mutableListOf()
+class AccessibilityEventUIParser {
+    val uiNodes: MutableList<UINodeProperties> = mutableListOf()
     private val nodesToParse: ArrayDeque<AccessibilityNodeInfo> = ArrayDeque()
 
-    companion object Factory {
-        public fun parse(node: AccessibilityNodeInfo): UIHierarchyExplorer {
+    companion object {
+        public fun parse(node: AccessibilityNodeInfo): AccessibilityEventUIParser {
 
-            val explorer = UIHierarchyExplorer()
+            val parser = AccessibilityEventUIParser()
             try {
-                explorer.nodesToParse.addLast(node)
-                while (!explorer.nodesToParse.isEmpty()) {
-                    explorer.hierarchyList.add(explorer.parseNode())
+                parser.nodesToParse.addLast(node)
+                while (!parser.nodesToParse.isEmpty()) {
+                    parser.uiNodes.add(parser.parseNode())
                 }
-                return explorer
+                return parser
             } catch (_: Exception) {}
 
-            return explorer
+            return parser
         }
     }
 
     public fun searchId(id: String): UINodeProperties? {
         runCatching {
             val idNum = id.toInt()
-            return (if (idNum > hierarchyList.size) {
+            return (if (idNum > uiNodes.size) {
                 null
             } else {
-                hierarchyList[idNum]
+                uiNodes[idNum]
             })
         }
 
@@ -40,7 +40,7 @@ class UIHierarchyExplorer {
 
     public override fun toString(): String {
         val json = Json { prettyPrint = true }
-        return json.encodeToString(hierarchyList)
+        return json.encodeToString(uiNodes)
 
     }
 
@@ -49,7 +49,7 @@ class UIHierarchyExplorer {
         val nodeType = getNodeType(node)
         val nodeText = node.text?.toString() ?: ""
         val childText = parseChildText(node)
-        val id = hierarchyList.lastIndex + 1
+        val id = uiNodes.lastIndex + 1
         val np = UINodeProperties(node, nodeType, nodeText, childText, id)
         return np
     }
@@ -99,18 +99,3 @@ class UIHierarchyExplorer {
         return result
     }
 }
-
-// these could be their own classes, but not necessary currently
-enum class UINodeType {
-    CLICKABLE, TEXTUAL
-}
-
-@Serializable
-data class UINodeProperties(
-    @Transient
-    val node: AccessibilityNodeInfo? = null,
-    val nodeType: UINodeType,
-    val nodeText: String,
-    val childrenText: List<String>,
-    val id: Int
-)
