@@ -9,13 +9,12 @@ import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import androidx.core.app.NotificationCompat
 import se.mindi.utils.STT
-import se.mindi.utils.UIHierarchyExplorer
-import android.app.Service
+import se.mindi.parser.AccessibilityEventUIParser
 import android.content.pm.ServiceInfo
-import se.mindi.R
 import se.mindi.utils.AI
 import kotlinx.coroutines.*
-import se.mindi.utils.TTS
+import se.mindi.parser.AICommandParser
+import se.mindi.runner.AICommandRunner
 
 
 class AccessibilityService : AccessibilityService() {
@@ -69,14 +68,13 @@ class AccessibilityService : AccessibilityService() {
                     startVoiceForeground()
                     stt.startListening { text ->
                         if (text!=null) {
-                            val explorer = UIHierarchyExplorer.parse(this)
-                            Log.d("EXPLORER", "$explorer")
+                            val uiParser = AccessibilityEventUIParser.parse(this)
+                            Log.d("EXPLORER", "$uiParser")
                             scope.launch {
                                 try{
-                                    var response = ai.getAIResponse(text, explorer.toString())
+                                    var response = ai.getAIResponse(text, uiParser.toString())
                                     if (response != null) {
-                                        handle(response)
-
+                                        handle(response, uiParser)
                                     }
                                 } finally{
                                     inProgress = false
@@ -99,11 +97,14 @@ class AccessibilityService : AccessibilityService() {
                 }
         }
     }
-    private fun handle(aiInput : String)
+    private fun handle(aiInput : String, explorer: AccessibilityEventUIParser)
     {
-        aiInput.lines().forEach { line ->
-            if (line.substring(0,3).equals("Say")) TTS.Companion.speakOut(line.substring(3,line.length-1))
-            //else if (line.substring(0,6).equals("Select"))
+        val commands = AICommandParser.parse(aiInput)
+        if (commands != null) {
+            AICommandRunner.run(commands, explorer)
+        } else {
+            Log.e("Error", "there were no commands to run")
+            // TTS.speakError("")
         }
     }
 

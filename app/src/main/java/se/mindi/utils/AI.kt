@@ -8,21 +8,26 @@ import com.aallam.openai.api.http.Timeout
 import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.OpenAI
 import se.mindi.BuildConfig
+import se.mindi.model.UINodeProperties
+import se.mindi.model.UINodeType
 import se.mindi.utils.TTS
 import kotlin.time.Duration.Companion.seconds
 
 class AI {
+    val aiPrompt = """
+            You are a helpful assistant with the goal of helping a possibly impaired person 
+            to use an android phone. You will be prompted with both a brief description of 
+            UI elements given in the json form ${AIPromptExamples.AIInputNodesExampleJson} such that
+            ${AIPromptExamples.AIUINodePropertiesExplanation}. a user request will also be given.
+            please respond like the json example ${AIPromptExamples.AICommandExampleJson} of which
+            ${AIPromptExamples.AICommandPossibleTypes}.
+            Note that the user cannot use these commands and will not see or hear your whole
+            response.
+            """.trimIndent()
     val conversationHistory = mutableListOf<ChatMessage>(
         ChatMessage(
             role = ChatRole.System,
-            content = "You are a helpful assistant with the goal of helping a possibly impaired person " +
-                    "to use an android phone. You will be prompted with both a brief description of " +
-                    "UI elements as well as a user request. Please respond using the following commands, " +
-                    "separated by newlines:\n" +
-                    "To speak aloud to the user, use Say(text)\n" +
-                    "To select the UI element with name 'optionName', use Select(optionName)\n" +
-                    "Note that the user cannot use these commands and will not see or hear your whole " +
-                    "response."
+            content = aiPrompt
         )
     )
     private val ai = OpenAI(

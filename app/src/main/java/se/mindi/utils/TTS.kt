@@ -11,5 +11,10 @@ class TTS {
                 tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "ID_1")
             }
         }
+
+        fun speakError(err: String) {
+            val text = "an error has occurred. $err"
+            speakOut(text)
+        }
     }
 }
