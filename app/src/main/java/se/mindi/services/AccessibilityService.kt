@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import se.mindi.utils.STT
 import se.mindi.parser.AccessibilityEventUIParser
 import android.content.pm.ServiceInfo
+import android.view.accessibility.AccessibilityNodeInfo
 import se.mindi.utils.AI
 import kotlinx.coroutines.*
 import se.mindi.parser.AICommandParser
@@ -21,6 +22,7 @@ class AccessibilityService : AccessibilityService() {
 
     companion object{
         private var inProgress = false
+        lateinit var instance: se.mindi.services.AccessibilityService
     }
     private lateinit var stt: STT
     private var ai = AI()
@@ -38,13 +40,19 @@ class AccessibilityService : AccessibilityService() {
         stt = STT(this)
     }
 
+    fun getActiveRoot(): AccessibilityNodeInfo?  {
+
+        return rootInActiveWindow
+    }
+
     override fun onServiceConnected() {
-        Log.d("STARTUP", "STARTUP")
+        instance = this
         stt = STT(this)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         // If flag is already raised, do nothing.
+        Log.d("in progress", "in progress ${event.action}, ${event.eventType} content changes ${event.contentDescription} ${event.contentChangeTypes}")
         if (inProgress) return
 
         //ignore rapid-fire events
@@ -56,6 +64,7 @@ class AccessibilityService : AccessibilityService() {
 
         inProgress = true
         // Get the source node of the event.
+        Log.d("called", "called")
         event.source?.apply {
 
             // Use the event and node information to determine what action to
@@ -65,38 +74,40 @@ class AccessibilityService : AccessibilityService() {
                 try {
 
                     //send the notification
-                    startVoiceForeground()
-                    stt.startListening { text ->
-                        if (text!=null) {
-                            val uiParser = AccessibilityEventUIParser.parse(this)
-                            Log.d("EXPLORER", "$uiParser")
-                            scope.launch {
-                                try{
-                                    var response = ai.getAIResponse(text, uiParser.toString())
-                                    if (response != null) {
-                                        handle(response, uiParser)
-                                    }
-                                } finally{
-                                    inProgress = false
-                                    //delete the notification
-                                    stopForeground(STOP_FOREGROUND_REMOVE)
-                                }
-
-                            }
-                        //if there was no text
-                        } else{
-                            inProgress = false
-                            //delete the notification
-                            stopForeground(STOP_FOREGROUND_REMOVE)
-                        }
-                    }
+                    Log.d("running", "running")
+                    val uiParser = AccessibilityEventUIParser.parse(rootInActiveWindow)
+//                    startVoiceForeground()
+//                    stt.startListening { text ->
+//                        if (text!=null) {
+//                            val uiParser = AccessibilityEventUIParser.parse(this)
+//                            Log.d("EXPLORER", "$uiParser")
+//                            scope.launch {
+//                                try{
+//                                    var response = ai.getAIResponse(text, uiParser.toString())
+//                                    if (response != null) {
+//                                        handle(response, uiParser)
+//                                    }
+//                                } finally{
+//                                    inProgress = false
+//                                    //delete the notification
+//                                    stopForeground(STOP_FOREGROUND_REMOVE)
+//                                }
+//
+//                            }
+//                        //if there was no text
+//                        } else{
+//                            //delete the notification
+//                            stopForeground(STOP_FOREGROUND_REMOVE)
+//                        }
+//                    }
 
                 } catch (ex: Exception) {
                     Log.d("ERROR", "$ex")
-                    inProgress = false
                 }
         }
+        inProgress = false
     }
+
     private fun handle(aiInput : String, explorer: AccessibilityEventUIParser)
     {
         val commands = AICommandParser.parse(aiInput)
@@ -116,6 +127,7 @@ class AccessibilityService : AccessibilityService() {
 
     protected override fun onKeyEvent(event: KeyEvent): Boolean {
 
+        Log.d("keycode", "$event.keyCode")
         return super.onKeyEvent(event)
     }
     //This helps to ensure that android does not block the program from running in background
