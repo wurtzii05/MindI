@@ -23,7 +23,7 @@ import se.mindi.utils.AI
 import se.mindi.utils.STT
 
 class VoiceInteractionSession(context: Context) : VoiceInteractionSession(context) {
-    private lateinit var stt: STT
+    private var stt = STT(context)
     private var ai = AI()
     //needed for dealing with coroutines
     private val scope = MainScope()
