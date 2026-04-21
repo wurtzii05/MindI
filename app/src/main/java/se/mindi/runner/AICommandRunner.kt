@@ -23,8 +23,10 @@ class AICommandRunner {
 
 
         private fun runSelectCommand(command: AICommand, uiNodeParser: AccessibilityEventUIParser) {
-            val node = uiNodeParser.searchId(command.toString())
-            node?.node?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            for (id in command.ids) {
+                val node = uiNodeParser.searchId("$id")
+                node?.node?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            }
         }
 
         private fun runSayCommand(command: AICommand, uiNodeParser: AccessibilityEventUIParser) {
