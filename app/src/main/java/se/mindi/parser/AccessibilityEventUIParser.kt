@@ -1,7 +1,5 @@
 package se.mindi.parser
 
-import android.util.Log
-import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import kotlinx.serialization.json.Json
 import se.mindi.model.UINodeProperties
@@ -14,23 +12,15 @@ class AccessibilityEventUIParser {
     companion object {
         public fun parse(node: AccessibilityNodeInfo): AccessibilityEventUIParser {
 
-//            val focus = node.parent
-//            Log.d("window", """
-//                ${focus}
-//            """.trimIndent())
             val parser = AccessibilityEventUIParser()
-            parser.printNodes(node)
+            try {
+                parser.nodesToParse.addLast(node)
+                while (!parser.nodesToParse.isEmpty()) {
+                    parser.uiNodes.add(parser.parseNode())
+                }
+                return parser
+            } catch (_: Exception) {}
 
-//            try {
-//                parser.nodesToParse.addLast(focus)
-//                while (!parser.nodesToParse.isEmpty()) {
-//                    parser.uiNodes.add(parser.parseNode())
-//                }
-//                Log.d("parser", "$parser: Count: ${focus.childCount}");
-//                return parser
-//            } catch (_: Exception) {}
-//
-//            Log.d("parser", "$parser: Count: ${focus?.childCount}");
             return parser
         }
     }
@@ -52,15 +42,6 @@ class AccessibilityEventUIParser {
         val json = Json { prettyPrint = true }
         return json.encodeToString(uiNodes)
 
-    }
-
-    private fun printNodes(node: AccessibilityNodeInfo) {
-        Log.d("child", "TEXT: ${node.text} ${node.className} $node")
-        val childrenCount = node.childCount
-        for (i in 0 until childrenCount) {
-            val child = node.getChild(i)
-            printNodes(child)
-        }
     }
 
     private fun parseNode(): UINodeProperties {
