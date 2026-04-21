@@ -51,6 +51,61 @@ class AccessibilityService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
+        // If flag is already raised, do nothing.
+        Log.d("in progress", "in progress ${event.action}, ${event.eventType} content changes ${event.contentDescription} ${event.contentChangeTypes}")
+        if (inProgress) return
+
+        //ignore rapid-fire events
+        if (event.eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) return
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) return
+        if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) return
+
+        val source = event.source ?: return
+
+        inProgress = true
+        // Get the source node of the event.
+        Log.d("called", "called")
+        event.source?.apply {
+
+            // Use the event and node information to determine what action to
+            // take.
+
+            // Act on behalf of the user.
+                try {
+
+                    //send the notification
+                    Log.d("running", "running")
+                    val uiParser = AccessibilityEventUIParser.parse(rootInActiveWindow)
+//                    startVoiceForeground()
+//                    stt.startListening { text ->
+//                        if (text!=null) {
+//                            val uiParser = AccessibilityEventUIParser.parse(this)
+//                            Log.d("EXPLORER", "$uiParser")
+//                            scope.launch {
+//                                try{
+//                                    var response = ai.getAIResponse(text, uiParser.toString())
+//                                    if (response != null) {
+//                                        handle(response, uiParser)
+//                                    }
+//                                } finally{
+//                                    inProgress = false
+//                                    //delete the notification
+//                                    stopForeground(STOP_FOREGROUND_REMOVE)
+//                                }
+//
+//                            }
+//                        //if there was no text
+//                        } else{
+//                            //delete the notification
+//                            stopForeground(STOP_FOREGROUND_REMOVE)
+//                        }
+//                    }
+
+                } catch (ex: Exception) {
+                    Log.d("ERROR", "$ex")
+                }
+        }
+        inProgress = false
     }
 
     private fun handle(aiInput : String, explorer: AccessibilityEventUIParser)
