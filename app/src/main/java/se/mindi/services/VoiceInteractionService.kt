@@ -9,4 +9,5 @@ class VoiceInteractionService: VoiceInteractionService() {
         super.onReady()
         Log.d("VoiceInteractionService", "ready")
     }
+
 }

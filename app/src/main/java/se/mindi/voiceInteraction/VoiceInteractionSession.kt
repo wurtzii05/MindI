@@ -1,11 +1,20 @@
 package se.mindi.voiceInteraction
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.Bundle
 import android.service.voice.VoiceInteractionSession
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat.getSystemService
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import se.mindi.R
 import se.mindi.parser.AICommandParser
 import se.mindi.runner.AICommandRunner
 import se.mindi.parser.AccessibilityEventUIParser
@@ -26,7 +35,7 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
         try {
             //send the notification
             val text = ""
-            // stt.startListening { text ->
+             stt.startListening { text ->
                 if (text != null) {
                     scope.launch {
                         var response = ai.getAIResponse(text, uiParser.toString())
@@ -35,7 +44,7 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
                         }
                     }
                 }
-            //}
+            }
 
         } catch (ex: Exception) {
             Log.d("ERROR", "$ex")
@@ -52,7 +61,7 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
             // TTS.speakError("")
         }
     }
-/*
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -64,27 +73,18 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
             manager?.createNotificationChannel(channel)
         }
     }
-*/
-/*
-    private fun startVoiceForeground() {
-        val notification = NotificationCompat.Builder(context, "voice_input_channel")
-            .setContentTitle("Voice Input Active")
-            .setContentText("Listening for speech...")
-            .setSmallIcon(android.R.drawable.ic_btn_speak_now) // Ensure you have this icon
-            .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .build()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            // Android 14+ specific requirement
-            context.startForeground(
-                1001,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
-            )
-        } else {
-            context.startForeground(1001, notification)
-        }
+    override fun onCreateContentView(): View {
+        // Inflate a custom layout (e.g., a bottom sheet with a mic icon)
+        val view = LayoutInflater.from(context).inflate(R.layout.assistant_overlay, null)
+        return view
     }
-*/
+
+
+    private fun startListening() {
+        // Use the RecognitionService defined in your XML
+        // or a standard SpeechRecognizer to process audio
+    }
+
+
 }

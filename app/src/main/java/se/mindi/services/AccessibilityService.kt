@@ -66,7 +66,7 @@ class AccessibilityService : AccessibilityService() {
 
     @Deprecated("Deprecated in Java")
     override fun onGesture(event: Int): Boolean {
-        Log.d("Acess", "listening")
+        Log.d("Access", "listening")
         return false
     }
 
