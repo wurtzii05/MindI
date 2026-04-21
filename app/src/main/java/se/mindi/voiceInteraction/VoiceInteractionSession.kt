@@ -21,24 +21,27 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
     override fun onShow(args: Bundle?, showFlags: Int) {
         super.onShow(args, showFlags)
 
-        val root = AccessibilityService.instance.getActiveRoot() ?: return
-        val uiParser = AccessibilityEventUIParser.parse(root)
         try {
-            //send the notification
-            val text = ""
-            // stt.startListening { text ->
-                if (text != null) {
-                    scope.launch {
-                        var response = ai.getAIResponse(text, uiParser.toString())
-                        if (response != null) {
-                            handle(response, uiParser)
-                        }
-                    }
-                }
-            //}
+            // todo listen to stt
 
         } catch (ex: Exception) {
             Log.d("ERROR", "$ex")
+        }
+        hide()
+    }
+
+    override fun onHide() {
+        super.onHide()
+        val root = AccessibilityService.instance.getActiveRoot() ?: return
+        val uiParser = AccessibilityEventUIParser.parse(root)
+        val text = "open mindi"
+        if (text != null) {
+            scope.launch {
+                var response = ai.getAIResponse(text, uiParser.toString())
+                if (response != null) {
+                    handle(response, uiParser)
+                }
+            }
         }
     }
 
