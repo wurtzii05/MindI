@@ -11,5 +11,9 @@ import se.mindi.services.AccessibilityService
 class VoiceInteractionSession(context: Context) : VoiceInteractionSession(context) {
     override fun onShow(args: Bundle?, showFlags: Int) {
         super.onShow(args, showFlags)
+
+        val root = AccessibilityService.instance.getActiveRoot() ?: return
+        val ui = AccessibilityEventUIParser.parse(root)
+        Log.d("ui stuff", "$ui")
     }
 }
