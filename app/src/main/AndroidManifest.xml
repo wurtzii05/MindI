@@ -56,7 +56,8 @@
             </intent-filter>
         </service>
         <service
-            android:name=".services.VoiceInteractSessionService"
+            android:name=".services.VoiceInteractionSessionService"
+            android:exported="true"
             android:permission="android.permission.BIND_VOICE_INTERACTION" >
         </service>
     </application>

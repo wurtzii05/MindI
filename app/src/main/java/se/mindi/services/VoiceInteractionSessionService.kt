@@ -3,9 +3,11 @@ package se.mindi.services
 import android.os.Bundle
 import android.service.voice.VoiceInteractionSession
 import android.service.voice.VoiceInteractionSessionService
+import android.util.Log
 
-class VoiceInteractSessionService : VoiceInteractionSessionService() {
+class VoiceInteractionSessionService : VoiceInteractionSessionService() {
     override fun onNewSession(args: Bundle?): VoiceInteractionSession? {
-        TODO("Not yet implemented")
+        Log.d("VoiceInteractionSessionService", "starting new session")
+        return se.mindi.voiceInteraction.VoiceInteractionSession(this)
     }
 }

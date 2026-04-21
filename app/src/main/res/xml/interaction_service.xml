@@ -4,6 +4,6 @@ Source - https://stackoverflow.com/a/66726670
 Posted by eaydin79
 Retrieved 2026-04-20, License - CC BY-SA 4.0 -->
 <voice-interaction-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:sessionService="com.se.mindi.services.voiceInteractionSessionService"
-    android:recognitionService="com.mindi.services.voiceInteractionService"
+    android:sessionService="se.mindi.services.VoiceInteractionSessionService"
+    android:recognitionService="se.mindi.services.VoiceInteractionService"
     android:supportsAssist="true" />
