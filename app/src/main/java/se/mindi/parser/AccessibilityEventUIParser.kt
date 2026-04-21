@@ -60,10 +60,9 @@ class AccessibilityEventUIParser {
             val childType = getNodeType(child)
             if (childType == UINodeType.CLICKABLE) {
                 nodesToParse.add(child)
-                continue
+            } else {
+                parseChildTextHelper(child, result)
             }
-
-            parseChildTextHelper(child, result)
         }
 
         return result
@@ -90,10 +89,9 @@ class AccessibilityEventUIParser {
             // only want nodes with text
             if (childType == UINodeType.CLICKABLE) {
                 nodesToParse.addLast(child)
-                continue
+            } else {
+                parseChildTextHelper(child, result)
             }
-
-            return parseChildTextHelper(child, result)
         }
 
         return result
