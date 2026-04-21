@@ -81,10 +81,5 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
     }
 
 
-    private fun startListening() {
-        // Use the RecognitionService defined in your XML
-        // or a standard SpeechRecognizer to process audio
-    }
-
 
 }
