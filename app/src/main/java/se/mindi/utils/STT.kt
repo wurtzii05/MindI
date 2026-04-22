@@ -58,6 +58,10 @@ class STT(private val context: Context) {
 
         speechRecognizer?.startListening(intent)
     }
+    public fun stopListening()
+    {
+        speechRecognizer!!.stopListening()
+    }
 
     private fun cleanup() {
         speechRecognizer?.destroy()

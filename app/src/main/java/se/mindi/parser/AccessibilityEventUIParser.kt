@@ -1,5 +1,6 @@
 package se.mindi.parser
 
+import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 import kotlinx.serialization.json.Json
 import se.mindi.model.UINodeProperties
@@ -19,7 +20,8 @@ class AccessibilityEventUIParser {
                     parser.uiNodes.add(parser.parseNode())
                 }
                 return parser
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                Log.d("Parser", e.toString())}
 
             return parser
         }
