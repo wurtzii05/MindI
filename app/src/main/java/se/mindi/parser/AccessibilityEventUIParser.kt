@@ -1,5 +1,6 @@
 package se.mindi.parser
 
+import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 import kotlinx.serialization.json.Json
 import se.mindi.model.UINodeProperties
@@ -19,7 +20,8 @@ class AccessibilityEventUIParser {
                     parser.uiNodes.add(parser.parseNode())
                 }
                 return parser
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                Log.d("Parser", e.toString())}
 
             return parser
         }
@@ -60,10 +62,9 @@ class AccessibilityEventUIParser {
             val childType = getNodeType(child)
             if (childType == UINodeType.CLICKABLE) {
                 nodesToParse.add(child)
-                continue
+            } else {
+                parseChildTextHelper(child, result)
             }
-
-            parseChildTextHelper(child, result)
         }
 
         return result
@@ -90,10 +91,9 @@ class AccessibilityEventUIParser {
             // only want nodes with text
             if (childType == UINodeType.CLICKABLE) {
                 nodesToParse.addLast(child)
-                continue
+            } else {
+                parseChildTextHelper(child, result)
             }
-
-            return parseChildTextHelper(child, result)
         }
 
         return result

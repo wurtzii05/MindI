@@ -26,7 +26,8 @@ class STT(private val context: Context) {
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
 
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         }
 
         speechRecognizer?.setRecognitionListener(object : RecognitionListener {
@@ -56,6 +57,10 @@ class STT(private val context: Context) {
         })
 
         speechRecognizer?.startListening(intent)
+    }
+    public fun stopListening()
+    {
+        speechRecognizer!!.stopListening()
     }
 
     private fun cleanup() {
