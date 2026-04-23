@@ -43,6 +43,12 @@ class AIPromptExamples {
             |${AICommandType.SELECT} specifies a uielement that should be clicked
             |id: a digit that corresponds to the id field in the given ui
             |custom text: is any text that you feel should be said to the user, this must be accompanied by a ${AICommandType.SAY} command
+            |your first command must be a ${AICommandType.COMMAND_COMPLETE} if you believe your given commands will complete the task given
+            |or a ${AICommandType.COMMAND_INCOMPLETE}. These two command types may not be used elsewehere. if the task is not finished with the current set of commands. 
+            |If a task is incomplete we will 
+            |run your commands and send you a new ui list.
+            |IMPORTANT: if you do not see any way of completing the given task, with the ui and commands provided, then you must return a ${AICommandType.COMMAND_COMPLETE}.
+            |IMPORTANT: if a task is incomplete, the custom text should detail, what portion of the task this will complete, which we will send to you so that you know the next steps to take
         """.trimMargin()
     }
 }

@@ -14,5 +14,5 @@ data class AICommand (
     val customText: String
 )
 enum class AICommandType {
-    SAY, SELECT
+    SAY, SELECT, COMMAND_COMPLETE, COMMAND_INCOMPLETE
 }

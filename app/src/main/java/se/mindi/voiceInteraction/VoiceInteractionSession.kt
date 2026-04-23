@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import se.mindi.R
+import se.mindi.model.AICommandType
 import se.mindi.parser.AICommandParser
 import se.mindi.runner.AICommandRunner
 import se.mindi.parser.AccessibilityEventUIParser
@@ -43,20 +44,22 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
         )
         //showNotification()
         try {
-            val text = ""
-            val root = AccessibilityService.instance.getActiveRoot() ?: return
+            val text = "open mcdonalds and add a burger to the cart"
+            storedSpeech = text
+/*
             stt.startListening { text ->
                 if (text != null) {
-                    storedSpeech = text?:""
                     Log.d("Strings", storedSpeech)
 
-                    val uiParser = AccessibilityEventUIParser.parse(root)
-                    getAIResponse(storedSpeech, uiParser)
+*/
+                    getAIResponse(text)
 
+/*
                 } else {
                     //finishSession()
                 }
             }
+*/
         } catch (ex: Exception) {
             Log.d("ERROR", "$ex")
         }
@@ -66,28 +69,50 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
     {
         super.onHide()
     }
-    fun getAIResponse(speech: String, uiParser: AccessibilityEventUIParser)
+    fun getAIResponse(speech: String)
     {
-        Log.d("UI", uiParser.toString())
         Log.d("STAMP","ONHIDE")
         scope.launch {
-            var response = ai.getAIResponse(storedSpeech, uiParser.toString())
-            //finishSession()
-            if (response != null) {
-                handle(response, uiParser)
+            while (true) {
+                val root = AccessibilityService.instance.getActiveRoot() ?: break
+                val uiParser = AccessibilityEventUIParser.parse(root)
+                Log.d("UI", uiParser.toString())
+                var response = ai.getAIResponse(storedSpeech, uiParser.toString())
+                Log.d("response", "$response")
+                //finishSession()
+                if (response != null) {
+                    val isFinished = handle(response, uiParser)
+                    if (isFinished) {
+                        break;
+                    }
+                }
             }
         }
     }
 
-    private fun handle(aiInput : String, explorer: AccessibilityEventUIParser)
+    private fun handle(aiInput : String, explorer: AccessibilityEventUIParser): Boolean
     {
         val commands = AICommandParser.parse(aiInput)
         if (commands != null) {
-            AICommandRunner.run(commands, explorer)
+            try {
+                AICommandRunner.run(commands.drop(1), explorer)
+            } catch (_ : Exception) {
+                return true // moron ai probably did a command_complete in middle of commands
+            }
         } else {
             Log.e("Error", "there were no commands to run")
             // TTS.speakError("")
         }
+
+        Log.d("COMMAND TYPE", "${commands?.get(0)?.commandType}")
+        val firstCommand = commands?.get(0)
+        if (firstCommand?.commandType == AICommandType.COMMAND_COMPLETE) {
+            return true
+        } else {
+            storedSpeech += " ${firstCommand?.customText ?: ""}"
+        }
+
+        return false
     }
     private fun showNotification() {
         val channelId = "voice_input_channel"
