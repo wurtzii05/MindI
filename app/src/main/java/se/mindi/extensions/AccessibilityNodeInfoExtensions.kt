@@ -21,6 +21,7 @@ fun toUINodeHelper(node: AccessibilityNodeInfo): UINode {
     return UINode(
         isClickable = isClickable,
         text = text,
-        children = children
+        children = children,
+        accessibilityNode = node
     )
 }

@@ -53,7 +53,7 @@ class AccessibilityEventUIParser {
         val nodeText = node.text?.toString() ?: ""
         val childText = parseChildText(node)
         val id = uiNodes.lastIndex + 1
-        val np = UINodeProperties(node, nodeType, nodeText, childText, id)
+        val np = UINodeProperties(node.accessibilityNode, nodeType, nodeText, childText, id)
         return np
     }
 

@@ -9,7 +9,8 @@ import kotlinx.serialization.Transient
 data class UINode(
     val isClickable: Boolean,
     val text: String?,
-    val children: List<UINode>
+    val children: List<UINode>,
+    val accessibilityNode: AccessibilityNodeInfo? // should simply be null for alternative node types
 )
 
 @Serializable
