@@ -18,6 +18,7 @@ class AICommandRunner {
             when (command.commandType) {
                 AICommandType.SAY -> runSayCommand(command, uiNodeParser)
                 AICommandType.SELECT -> runSelectCommand(command, uiNodeParser)
+                else -> throw Exception("invalid command type ${command.commandType}")
             }
         }
 

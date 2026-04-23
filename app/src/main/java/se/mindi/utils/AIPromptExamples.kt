@@ -43,6 +43,10 @@ class AIPromptExamples {
             |${AICommandType.SELECT} specifies a uielement that should be clicked
             |id: a digit that corresponds to the id field in the given ui
             |custom text: is any text that you feel should be said to the user, this must be accompanied by a ${AICommandType.SAY} command
+            |if you believe you will need to see the updated ui after the current command to complete the task, then have your LAST command
+            |be ${AICommandType.COMMAND_INCOMPLETE}, with the customText being what you completed during this step. If you would set out to complete
+            |the same thing that you have already done, then do not repeat it!
+            |IMPORTANT: if you do not see any way of completing the given task, with the ui and commands provided then do not use ${AICommandType.COMMAND_INCOMPLETE}
         """.trimMargin()
     }
 }
