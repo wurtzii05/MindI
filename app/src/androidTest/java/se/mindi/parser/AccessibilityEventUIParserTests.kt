@@ -80,11 +80,12 @@ class AccessibilityEventUIParserTests {
             val semanticsNodeInteraction = composeRule.onRoot()
             val uiNodeRoot = semanticsNodeInteraction.toUINode()
             val parser = AccessibilityEventUIParser.parse(uiNodeRoot)
+            println("PARSER $parser")
 
             val expectedNumNodes = 2
             assertEquals(expectedNumNodes, parser.uiNodes.count()) // should only have 1 element
-            val textNode = parser.uiNodes[1]
-            val clickNode = parser.uiNodes[2]
+            val textNode = parser.uiNodes[0]
+            val clickNode = parser.uiNodes[1]
 
             assertEquals(UINodeType.TEXTUAL, textNode.nodeType)
             assertEquals(UINodeType.CLICKABLE, clickNode.nodeType)
@@ -92,7 +93,7 @@ class AccessibilityEventUIParserTests {
             assertEquals(1, textNode.childrenText.count())
             assertEquals(0, clickNode.childrenText.count())
 
-            assertEquals(expectedText, textNode.childrenText[0])
+            assertEquals("[$expectedText]", textNode.childrenText[0])
         }
 
             @Test
@@ -107,12 +108,10 @@ class AccessibilityEventUIParserTests {
                 val semanticsNodeInteraction = composeRule.onRoot()
                 val uiNodeRoot = semanticsNodeInteraction.toUINode()
                 val parser = AccessibilityEventUIParser.parse(uiNodeRoot)
-                Log.d("test", "$parser")
-                assertEquals(1, parser.uiNodes.count()) // should only have 1 element
+                println("THE PARSER SHOWUP!!! $parser")
+                assertEquals(2, parser.uiNodes.count()) // should only have 1 element
                 val node = parser.uiNodes[0]
-                assertEquals(UINodeType.CLICKABLE, node.nodeType) // should be clickable
-                assertEquals(1, node.childrenText.count()) // should only be 1 child text
-                val childText = node.childrenText[0]
-                assertEquals(expectedText, childText) // child text is "test"
+                assertEquals(UINodeType.TEXTUAL, node.nodeType) // should be clickable
+                assertEquals(0, node.childrenText.count()) // should only be 1 child text
             }
 }

@@ -8,7 +8,7 @@ import se.mindi.model.UINodeProperties
 import se.mindi.model.UINodeType
 
 class AccessibilityEventUIParser {
-    val uiNodes: MutableList<UINodeProperties> = mutableListOf()
+    var uiNodes: MutableList<UINodeProperties> = mutableListOf()
     private val nodesToParse: ArrayDeque<UINode> = ArrayDeque()
 
     companion object {
@@ -24,6 +24,7 @@ class AccessibilityEventUIParser {
             } catch (e: Exception) {
                 Log.d("Parser", e.toString())}
 
+            parser.pruneEmptyNodes()
             return parser
         }
     }
@@ -45,6 +46,13 @@ class AccessibilityEventUIParser {
         val json = Json { prettyPrint = true }
         return json.encodeToString(uiNodes)
 
+    }
+
+    private fun pruneEmptyNodes() {
+        // remove textual nodes with no actual text
+        this.uiNodes = this.uiNodes.filter {
+            (it.childrenText.count { lit -> lit != ""} != 0 || it.nodeText != "")
+                    || it.nodeType != UINodeType.TEXTUAL }.toMutableList()
     }
 
     private fun parseNode(): UINodeProperties {
