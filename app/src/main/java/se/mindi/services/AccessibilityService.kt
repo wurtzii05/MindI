@@ -36,11 +36,11 @@ class AccessibilityService : AccessibilityService() {
     private val scope = MainScope()
 
     private val handler = Handler(Looper.getMainLooper())
-    private val uiStoppedRunnable = Runnable {
-        onUIStoppedUpdating()
+    private val uiSettledRunnable = Runnable {
+        onUiSettled()
     }
 
-    private fun onUIStoppedUpdating() {
+    private fun onUiSettled() {
         if (!isAiTaskRunning) {
             return
         }
@@ -103,8 +103,8 @@ class AccessibilityService : AccessibilityService() {
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED,
             AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED-> {
                 // will wait for ui changes to stop for at least 500 millseconds so we know, its safe to proceed
-                handler.removeCallbacks(uiStoppedRunnable)
-                handler.postDelayed(uiStoppedRunnable, 500L)
+                handler.removeCallbacks(uiSettledRunnable)
+                handler.postDelayed(uiSettledRunnable, 500L)
             }
         }
     }
