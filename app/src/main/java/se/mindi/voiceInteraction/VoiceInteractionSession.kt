@@ -31,6 +31,7 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
     //needed for dealing with coroutines
     private val scope = MainScope()
     override fun onShow(args: Bundle?, showFlags: Int) {
+        AccessibilityService.isAiTaskRunning = false // kill any previous tasks
         super.onShow(args, showFlags)
 
         val window = window?.window ?: return
@@ -81,39 +82,16 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
                 Log.d("response", "$response")
                 //finishSession()
                 if (response != null) {
-                    val isFinished = handle(response, uiParser)
-                    if (isFinished) {
-                        break;
+                    val isFinished = ai.handleAiCommand(response, uiParser)
+                    if (!isFinished) {
+                        AccessibilityService.isAiTaskRunning = true
+                        AccessibilityService.storedAISpeech = speech
                     }
                 }
             }
         }
     }
 
-    private fun handle(aiInput : String, explorer: AccessibilityEventUIParser): Boolean
-    {
-        val commands = AICommandParser.parse(aiInput)
-        if (commands != null) {
-            try {
-                AICommandRunner.run(commands.drop(1), explorer)
-            } catch (_ : Exception) {
-                return true // moron ai probably did a command_complete in middle of commands
-            }
-        } else {
-            Log.e("Error", "there were no commands to run")
-            // TTS.speakError("")
-        }
-
-        Log.d("COMMAND TYPE", "${commands?.get(0)?.commandType}")
-        val firstCommand = commands?.get(0)
-        if (firstCommand?.commandType == AICommandType.COMMAND_COMPLETE) {
-            return true
-        } else {
-            storedSpeech += " ${firstCommand?.customText ?: ""}"
-        }
-
-        return false
-    }
     private fun showNotification() {
         val channelId = "voice_input_channel"
         createNotificationChannel()

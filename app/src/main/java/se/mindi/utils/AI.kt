@@ -8,9 +8,16 @@ import com.aallam.openai.api.http.Timeout
 import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.OpenAI
 import se.mindi.BuildConfig
+import se.mindi.model.AICommand
+import se.mindi.model.AICommandType
 import se.mindi.model.UINodeProperties
 import se.mindi.model.UINodeType
+import se.mindi.parser.AICommandParser
+import se.mindi.parser.AccessibilityEventUIParser
+import se.mindi.runner.AICommandRunner
+import se.mindi.services.AccessibilityService
 import se.mindi.utils.TTS
+import kotlin.collections.drop
 import kotlin.time.Duration.Companion.seconds
 
 class AI {
@@ -75,5 +82,28 @@ class AI {
         }
         //Should only happen if something goes wrong.
         return null
+    }
+
+    public fun handleAiCommand(aiInput : String, explorer: AccessibilityEventUIParser): Boolean
+    {
+        var commands = AICommandParser.parse(aiInput)
+        var answer = true
+        if (commands?.last()?.commandType == AICommandType.COMMAND_INCOMPLETE) {
+            answer = false
+            commands = commands?.dropLast(1);
+        }
+
+        if (commands != null) {
+            try {
+                AICommandRunner.run(commands, explorer)
+            } catch (_ : Exception) {
+                return true // moron ai probably did a command_complete in middle of commands
+            }
+        } else {
+            Log.e("Error", "there were no commands to run")
+            // TTS.speakError("")
+        }
+
+        return answer
     }
 }
