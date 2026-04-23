@@ -16,6 +16,7 @@ import android.os.Looper
 import android.view.accessibility.AccessibilityNodeInfo
 import se.mindi.utils.AI
 import kotlinx.coroutines.*
+import se.mindi.extensions.toUINode
 import se.mindi.model.UINodeType
 import se.mindi.parser.AICommandParser
 import se.mindi.runner.AICommandRunner
@@ -50,7 +51,7 @@ class AccessibilityService : AccessibilityService() {
         }
         // UI has loaded a new window/screen
         scope.launch {
-            val root = se.mindi.services.AccessibilityService.instance.getActiveRoot() ?: return@launch
+            val root = se.mindi.services.AccessibilityService.instance.getActiveRoot()?.toUINode() ?: return@launch
             val uiParser = AccessibilityEventUIParser.parse(root)
 
             // make sure the ui has fully launched with at least one ui button

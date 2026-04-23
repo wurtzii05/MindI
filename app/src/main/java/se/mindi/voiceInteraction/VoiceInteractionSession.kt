@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import se.mindi.R
+import se.mindi.extensions.toUINode
 import se.mindi.model.AICommandType
 import se.mindi.parser.AICommandParser
 import se.mindi.runner.AICommandRunner
@@ -75,7 +76,7 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
         Log.d("STAMP","ONHIDE")
         scope.launch {
             while (true) {
-                val root = AccessibilityService.instance.getActiveRoot() ?: break
+                val root = AccessibilityService.instance.getActiveRoot()?.toUINode() ?: break
                 val uiParser = AccessibilityEventUIParser.parse(root)
                 Log.d("UI", uiParser.toString())
                 var response = ai.getAIResponse(storedSpeech, uiParser.toString())

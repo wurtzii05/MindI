@@ -3,15 +3,16 @@ package se.mindi.parser
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 import kotlinx.serialization.json.Json
+import se.mindi.model.UINode
 import se.mindi.model.UINodeProperties
 import se.mindi.model.UINodeType
 
 class AccessibilityEventUIParser {
-    val uiNodes: MutableList<UINodeProperties> = mutableListOf()
-    private val nodesToParse: ArrayDeque<AccessibilityNodeInfo> = ArrayDeque()
+    var uiNodes: MutableList<UINodeProperties> = mutableListOf()
+    private val nodesToParse: ArrayDeque<UINode> = ArrayDeque()
 
     companion object {
-        public fun parse(node: AccessibilityNodeInfo): AccessibilityEventUIParser {
+        public fun parse(node: UINode): AccessibilityEventUIParser {
 
             val parser = AccessibilityEventUIParser()
             try {
@@ -23,6 +24,7 @@ class AccessibilityEventUIParser {
             } catch (e: Exception) {
                 Log.d("Parser", e.toString())}
 
+            parser.pruneEmptyNodes()
             return parser
         }
     }
@@ -46,19 +48,25 @@ class AccessibilityEventUIParser {
 
     }
 
+    private fun pruneEmptyNodes() {
+        // remove textual nodes with no actual text
+        this.uiNodes = this.uiNodes.filter {
+            (it.childrenText.count { lit -> lit != ""} != 0 || it.nodeText != "")
+                    || it.nodeType != UINodeType.TEXTUAL }.toMutableList()
+    }
+
     private fun parseNode(): UINodeProperties {
         val node = nodesToParse.removeFirst()
         val nodeType = getNodeType(node)
         val nodeText = node.text?.toString() ?: ""
         val childText = parseChildText(node)
         val id = uiNodes.lastIndex + 1
-        val np = UINodeProperties(node, nodeType, nodeText, childText, id)
+        val np = UINodeProperties(node.accessibilityNode, nodeType, nodeText, childText, id)
         return np
     }
 
-    private fun parseChildText(node: AccessibilityNodeInfo, result: MutableList<String> = mutableListOf()): List<String> {
-        for (i in 0 until node.childCount) {
-            val child = node.getChild(i)
+    private fun parseChildText(node: UINode, result: MutableList<String> = mutableListOf()): List<String> {
+        for (child in node.children) {
             val childType = getNodeType(child)
             if (childType == UINodeType.CLICKABLE) {
                 nodesToParse.add(child)
@@ -70,7 +78,7 @@ class AccessibilityEventUIParser {
         return result
     }
 
-    private fun getNodeType(node: AccessibilityNodeInfo): UINodeType {
+    private fun getNodeType(node: UINode): UINodeType {
         if (node.isClickable) {
             return UINodeType.CLICKABLE
         }
@@ -78,15 +86,14 @@ class AccessibilityEventUIParser {
         return UINodeType.TEXTUAL
     }
 
-    private fun parseChildTextHelper(node: AccessibilityNodeInfo, result: MutableList<String>): MutableList<String> {
+    private fun parseChildTextHelper(node: UINode, result: MutableList<String>): MutableList<String> {
         // add current text to list, then parse children
         val text = node.text?.toString()
         if (text != null) {
             result.add(text.trim())
         }
 
-        for (i in 0 until node.childCount) {
-            val child = node.getChild(i)
+        for (child in node.children) {
             val childType = getNodeType(child)
             // only want nodes with text
             if (childType == UINodeType.CLICKABLE) {
