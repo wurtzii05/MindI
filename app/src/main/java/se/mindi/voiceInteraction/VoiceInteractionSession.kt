@@ -46,22 +46,22 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
         )
         //showNotification()
         try {
-            val text = "open mcdonalds and add a burger to the cart"
-            storedSpeech = text
-/*
+            //val text = "open mcdonalds and add a burger to the cart"
+
             stt.startListening { text ->
                 if (text != null) {
+                    storedSpeech = text
                     Log.d("Strings", storedSpeech)
 
-*/
+
                     getAIResponse(text)
 
-/*
+
                 } else {
                     //finishSession()
                 }
             }
-*/
+
         } catch (ex: Exception) {
             Log.d("ERROR", "$ex")
         }
@@ -73,64 +73,29 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
     }
     fun getAIResponse(speech: String)
     {
+
         Log.d("STAMP","ONHIDE")
         scope.launch {
             while (true) {
                 val root = AccessibilityService.instance.getActiveRoot()?.toUINode() ?: break
                 val uiParser = AccessibilityEventUIParser.parse(root)
                 Log.d("UI", uiParser.toString())
-                var response = ai.getAIResponse(storedSpeech, uiParser.toString())
+                var response = ai.getAIResponse(storedSpeech,uiParser.toString())
                 Log.d("response", "$response")
                 //finishSession()
                 if (response != null) {
                     val isFinished = ai.handleAiCommand(response, uiParser)
-                    if (!isFinished) {
-                        AccessibilityService.isAiTaskRunning = true
-                        AccessibilityService.storedAISpeech = speech
+                    if (isFinished) {
+                        break
+                    } else {
+                        storedSpeech = ""
+                        Thread.sleep(2000)
                     }
                 }
             }
         }
     }
 
-    private fun showNotification() {
-        val channelId = "voice_input_channel"
-        createNotificationChannel()
-
-        val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_mic)
-            .setContentTitle("Assistant Active")
-            .setContentText("Listening for commands...")
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setOngoing(true)
-            .build()
-
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.notify(1, notification)
-    }
-    private fun finishSession() {
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        // Remove the notification
-        manager.cancel(1)
-        // Close the assistant overlay
-        finish()
-    }
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "voice_input_channel",
-                "Voice Input Service",
-                NotificationManager.IMPORTANCE_LOW
-            )
-            val manager = getSystemService(context, NotificationManager::class.java)
-            manager?.createNotificationChannel(channel)
-        }
-    }
-
-    //override fun onCreateContentView(): View {
-    //    val view = LayoutInflater.from(context).inflate(R.layout.assistant_overlay, null)
-    //    return view
-    //}
 
 
 
