@@ -15,7 +15,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat.getSystemService
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import se.mindi.R
 import se.mindi.extensions.toUINode
 import se.mindi.model.AICommandType
 import se.mindi.parser.AICommandParser
@@ -32,7 +31,8 @@ class VoiceInteractionSession(context: Context) : VoiceInteractionSession(contex
     //needed for dealing with coroutines
     private val scope = MainScope()
     override fun onShow(args: Bundle?, showFlags: Int) {
-        AccessibilityService.isAiTaskRunning = false // kill any previous tasks
+        // kill any previous tasks
+        AccessibilityService.isAiTaskRunning = false
         super.onShow(args, showFlags)
 
         val window = window?.window ?: return
