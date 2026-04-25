@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity() {
         //TEXT TO SPEECH
         TTS.tts = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                TTS.tts?.language = Locale.US
+                TTS.tts?.language = Locale.getDefault()
             }
         }
         val intent: Intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)

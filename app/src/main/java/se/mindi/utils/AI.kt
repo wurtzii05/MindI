@@ -63,6 +63,38 @@ class AI {
             )
             //generate the request
             val request = ChatCompletionRequest(
+                model = ModelId("gpt-5"),
+                messages = conversationHistory
+            )
+            //get the response
+            val response = ai.chatCompletion(request)
+            val outputMessage = response.choices.first().message
+            //add the response to the history
+            conversationHistory.add(outputMessage)
+
+            val outputText = outputMessage.content
+            Log.d("AIOutput","The ai said: " + outputText)
+            return outputText
+
+        } catch (e: Exception) {
+            Log.d("Exception","AI Response Failure")
+            e.message?.let { Log.d("Exception",it) }
+        }
+        //Should only happen if something goes wrong.
+        return null
+    }
+    public suspend fun getAIResponseSequential(uiText : String?) : String?
+    {
+        try {
+            //Give UI information (from role system)
+            conversationHistory.add(
+                ChatMessage(
+                    role = ChatRole.System,
+                    content = uiText
+                )
+            )
+            //generate the request
+            val request = ChatCompletionRequest(
                 model = ModelId("gpt-5-nano"),
                 messages = conversationHistory
             )
@@ -83,7 +115,6 @@ class AI {
         //Should only happen if something goes wrong.
         return null
     }
-
     public fun handleAiCommand(aiInput : String, explorer: AccessibilityEventUIParser): Boolean
     {
         var commands = AICommandParser.parse(aiInput)
@@ -91,6 +122,14 @@ class AI {
         if (commands?.last()?.commandType == AICommandType.COMMAND_INCOMPLETE) {
             answer = false
             commands = commands?.dropLast(1);
+            Log.d("AI Self-Message", commands?.last()?.customText!!)
+            conversationHistory.add(
+                ChatMessage(
+                    role = ChatRole.Assistant,
+                    content = commands?.last()?.customText
+                )
+            )
+            //
         }
 
         if (commands != null) {
