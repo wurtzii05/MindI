@@ -25,58 +25,12 @@ import se.mindi.runner.AICommandRunner
 class AccessibilityService : AccessibilityService() {
 
     companion object{
-        private var inProgress = false
         lateinit var instance: se.mindi.services.AccessibilityService
-        var isAiTaskRunning = false
-        var storedAISpeech = ""
-        var lock = false
     }
     private lateinit var stt: STT
     private var ai = AI()
     //needed for dealing with coroutines
     private val scope = MainScope()
-
-    private val handler = Handler(Looper.getMainLooper())
-    private val uiSettledRunnable = Runnable {
-        onUiSettled()
-    }
-
-    private fun onUiSettled() {
-        if (!isAiTaskRunning) {
-            return
-        }
-
-        if (lock) {
-            return
-        }
-        // UI has loaded a new window/screen
-        scope.launch {
-            val root = se.mindi.services.AccessibilityService.instance.getActiveRoot()?.toUINode() ?: return@launch
-            val uiParser = AccessibilityEventUIParser.parse(root)
-
-            // make sure the ui has fully launched with at least one ui button
-            if (!uiParser.uiNodes.any { el ->
-                    el.nodeType == UINodeType.CLICKABLE
-                }) {
-                return@launch
-            }
-            Log.d("ui parser", "$uiParser")
-            lock = true
-
-            Log.d("UI", uiParser.toString())
-            var response = ai.getAIResponse(se.mindi.services.AccessibilityService.storedAISpeech, uiParser.toString())
-            Log.d("response", "$response")
-            //finishSession()
-            if (response != null) {
-                val isFinished = ai.handleAiCommand(response, uiParser)
-                if (isFinished) {
-                    isAiTaskRunning = false
-                }
-            }
-
-            lock = false
-        }
-    }
 
     override fun onInterrupt() {
         Log.d("STARTUP", "STARTUPP")
@@ -100,14 +54,6 @@ class AccessibilityService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        when (event.eventType) {
-            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED,
-            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED-> {
-                // will wait for ui changes to stop for at least 500 millseconds so we know, its safe to proceed
-                handler.removeCallbacks(uiSettledRunnable)
-                handler.postDelayed(uiSettledRunnable, 500L)
-            }
-        }
     }
 
     @Deprecated("Deprecated in Java")
